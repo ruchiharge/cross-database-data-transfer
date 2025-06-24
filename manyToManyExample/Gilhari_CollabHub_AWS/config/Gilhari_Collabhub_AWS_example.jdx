@@ -1,0 +1,74 @@
+JDX_DATABASE JDX:jdbc:mysql://host.docker.internal:3306/gilhariawstest?useSSL=false;USER=dperiwal;PASSWORD=secretOne;JDX_DBTYPE=MYSQL;DEBUG_LEVEL=5
+JDBC_DRIVER com.mysql.cj.jdbc.Driver
+
+// Hard coding of the IP address of a MySQL database instance or specifying "host.docker.internal" is 
+// needed to access the database from within a docker container. Same for a Postgres database.
+
+// On Windows 10, use "ipconfig /all" on command line to get IPv4 Address (e.g. 174.18.38.81) under 
+// Ethernet adapter vEthernet (Default Switch) line and use that or "host.docker.internal"
+// instead of "localhost" in the JDBC url below:
+
+// JDX_DATABASE JDX:jdbc:mysql://localhost:3306/JDXTestDB?useSSL=false;USER=dperiwal;PASSWORD=secretOne;JDX_DBTYPE=MYSQL;DEBUG_LEVEL=5
+// JDX_DATABASE JDX:jdbc:mysql://host.docker.internal:3306/JDXTestDB?useSSL=false;USER=dperiwal;PASSWORD=secretOne;JDX_DBTYPE=MYSQL;DEBUG_LEVEL=5
+// JDX_DATABASE JDX:jdbc:mysql://172.18.48.241:3306/JDXTestDB?useSSL=false;USER=dperiwal;PASSWORD=secretOne;JDX_DBTYPE=MYSQL;DEBUG_LEVEL=5
+
+// Use an appropriate JDBC driver name as per the JDBC driver you are using
+// JDBC_DRIVER com.mysql.jdbc.Driver
+// JDBC_DRIVER com.mysql.cj.jdbc.Driver
+
+// JDX_DATABASE JDX:jdbc:postgresql://localhost:5432/jdxtestdb;USER=postgres;PASSWORD=My_Postgres;JDX_DBTYPE=POSTGRES;DEBUG_LEVEL=5
+// JDX_DATABASE JDX:jdbc:postgresql://host.docker.internal:5432/jdxtestdb;USER=postgres;PASSWORD=My_Postgres;JDX_DBTYPE=POSTGRES;DEBUG_LEVEL=5
+// JDBC_DRIVER org.postgresql.Driver
+
+JDX_OBJECT_MODEL_PACKAGE com.mycompany.Gilhari_Collabhub_AWS.model
+;
+REM ************************************************************************
+
+CLASS .JSON_Collaboration TABLE Collaboration
+
+    // First declare all the persistent JSON properties using VIRTUAL_ATTRIB specifications
+    VIRTUAL_ATTRIB userId ATTRIB_TYPE int
+    VIRTUAL_ATTRIB projectId ATTRIB_TYPE int
+
+    // Now provide the rest of the mapping specification for this class
+    PRIMARY_KEY userId projectId
+;
+
+JOIN_COLLECTION_CLASS ArrayUsers COLLECTION_TYPE ARRAY ELEMENT_CLASS .JSON_User JOIN_CLASS .JSON_Collaboration
+   PRIMARY_KEY projectId
+   JOIN_KEY userId
+;
+
+CLASS .JSON_Project TABLE Project
+
+    // First declare all the persistent JSON properties using VIRTUAL_ATTRIB specifications
+    VIRTUAL_ATTRIB projectId ATTRIB_TYPE int
+    VIRTUAL_ATTRIB projectName ATTRIB_TYPE java.lang.String
+    VIRTUAL_ATTRIB version ATTRIB_TYPE string  
+    VIRTUAL_ATTRIB startDate ATTRIB_TYPE long
+    VIRTUAL_ATTRIB status ATTRIB_TYPE java.lang.String
+    
+    // Now provide the rest of the mapping specification for this class
+    PRIMARY_KEY projectId
+    RELATIONSHIP users REFERENCES ArrayUsers BYVALUE WITH projectId
+    SQLMAP FOR startDate SQLTYPE DATE 
+;
+
+JOIN_COLLECTION_CLASS ArrayGroups COLLECTION_TYPE ARRAY ELEMENT_CLASS .JSON_Project JOIN_CLASS .JSON_Collaboration
+    PRIMARY_KEY userId
+    JOIN_KEY projectId
+;
+
+CLASS .JSON_User TABLE USER
+
+    // First declare all the persistent JSON properties using VIRTUAL_ATTRIB specifications
+    VIRTUAL_ATTRIB userId ATTRIB_TYPE int
+    VIRTUAL_ATTRIB userName ATTRIB_TYPE java.lang.String
+    VIRTUAL_ATTRIB currProjects ATTRIB_TYPE int
+    VIRTUAL_ATTRIB finishedProjects ATTRIB_TYPE int
+    VIRTUAL_ATTRIB rating ATTRIB_TYPE int
+
+    // Now provide the rest of the mapping specification for this class
+    PRIMARY_KEY userId
+    RELATIONSHIP projects REFERENCES ArrayGroups BYVALUE WITH userId
+;
