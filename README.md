@@ -194,6 +194,3 @@ python transform.py
 ```cmd
 python api_call.py
 ```
-
-# Deploying Gilhari on AWS  
-Follow [this article](https://medium.com/@tarun_chauhan/17ee4f157bc1) for detailed steps on deploying Gilhari microservice on AWS.
